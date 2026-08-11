@@ -42,7 +42,7 @@ font: 'simple',
 align: 'left',
 gradient: ['yellow', 'white']
 })
-say('Made with Ado', {
+say('Made with Duan', {
 font: 'console',
 align: 'center',
 colors: ['red', 'magenta', 'yellow']
