@@ -45,5 +45,5 @@ npm start
 
 「✦」Créditos
 
-> ✐ Creado por [meado-learner](https://github.com/meado-learner)  
-> ✐ Basado en SHADOW-BOT-MD / Michi-WaMD
+> ✐ Creado por [Duan](https://github.com/Edward-oficial)  
+> ✐ Basado en Michi-WaMD
