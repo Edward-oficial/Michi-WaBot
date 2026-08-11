@@ -29,11 +29,11 @@ global.jadi = "Sessions/SubBot"
 global.MichiJadibts = true
 
 global.botname = "𝖬𝗂𝖼𝗁𝗂 - 𝖡𝗈𝗍𝖶𝖺"
-global.textbot = "ᴍɪᴄʜɪ ᴠ3, 𝗔𝗱𝗼"
-global.dev = "✎ ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝗔𝗱𝗼"
-global.author = "© mᥲძᥱ ᥕі𝗍һ 𝖠𝖽𝗈"
-global.etiqueta = "𝖠𝖽𝗈 | 𝟤𝟢𝟤𝟧 ©"
-global.currency = "¢ Pesos"
+global.textbot = "ᴍɪᴄʜɪ ᴠ1, Ꭰᥙᥲᥒ"
+global.dev = "✎ ⍴᥆ᥕᥱrᥱძ ᑲᥡ Ꭰᥙᥲᥒ"
+global.author = "© mᥲძᥱ ᥕі𝗍һ Ꭰᥙᥲᥒ"
+global.etiqueta = "Ꭰᥙᥲᥒ | 𝟤𝟢𝟤𝟨 ©"
+global.currency = "¥ Yenes"
 global.michipg = "https://files.catbox.moe/p2eq60.jpg"
 global.icono = "https://files.catbox.moe/dnjyto.jpg"
 global.catalogo = fs.readFileSync('./lib/catalogo.jpg')
