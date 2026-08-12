@@ -48,7 +48,12 @@ if (socklimit >= 50) {
 return m.reply(`ꕥ No se han encontrado espacios para *Sockets* disponibles.`)
 }
 let mentionedJid = await m.mentionedJid
-let who = mentionedJid && mentionedJid[0] ? mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
+let typedNumber = args.find(a => /^\+?\d{8,15}$/.test(a.replace(/[^0-9]/g, '')))
+let who = mentionedJid && mentionedJid[0]
+? mentionedJid[0]
+: typedNumber
+? `${typedNumber.replace(/[^0-9]/g, '')}@s.whatsapp.net`
+: m.sender
 let id = `${who.split`@`[0]}`
 let pathMichiJadiBot = path.join(global.jadi, id)
 if (!fs.existsSync(pathMichiJadiBot)){
@@ -135,11 +140,16 @@ setTimeout(() => { conn.sendMessage(m.sender, { delete: txtQR.key })}, 30000)
 return
 } 
 if (qr && mcode) {
-let secret = await sock.requestPairingCode((m.sender.split`@`[0]))
+try {
+let secret = await sock.requestPairingCode(path.basename(pathMichiJadiBot))
 secret = secret.match(/.{1,4}/g)?.join("-")
 txtCode = await conn.sendMessage(m.chat, {text : rtx2}, { quoted: m })
 codeBot = await m.reply(secret)
 console.log(secret)
+} catch (e) {
+console.error(chalk.bold.red(`⚠︎ Error generando pairing code: ${e.message}`))
+if (m?.chat) await conn.reply(m.chat, `⚠︎ No se pudo generar el código de vinculación.\n\n> Error: ${e.message}`, m)
+}
 }
 if (txtCode && txtCode.key) {
 setTimeout(() => { conn.sendMessage(m.sender, { delete: txtCode.key })}, 30000)
