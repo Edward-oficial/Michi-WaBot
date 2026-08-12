@@ -45,7 +45,7 @@ global.channel = "https://whatsapp.com/channel/0029VbArz9fAO7RGy2915k3O"
 global.github = "https://github.com"
 global.gmail = "minexdt@gmail.com"
 global.ch = {
-ch1: "120363420941524030@newsletter"
+ch1: "120363418111976564@newsletter"
 }
 
 
