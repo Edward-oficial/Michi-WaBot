@@ -34,8 +34,8 @@ global.dev = "✎ ⍴᥆ᥕᥱrᥱძ ᑲᥡ Ꭰᥙᥲᥒ"
 global.author = "© mᥲძᥱ ᥕі𝗍һ Ꭰᥙᥲᥒ"
 global.etiqueta = "Ꭰᥙᥲᥒ | 𝟤𝟢𝟤𝟨 ©"
 global.currency = "¥ Yenes"
-global.michipg = "https://files.catbox.moe/p2eq60.jpg"
-global.icono = "https://files.catbox.moe/dnjyto.jpg"
+global.michipg = "http://duancdn.onrender.com/cdn/b53607df96ee0ef171064a11.jpg"
+global.icono = "http://duancdn.onrender.com/cdn/b53607df96ee0ef171064a11.jpg"
 global.catalogo = fs.readFileSync('./lib/catalogo.jpg')
 
 
