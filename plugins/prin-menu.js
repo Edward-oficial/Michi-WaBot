@@ -2,6 +2,8 @@ import moment from "moment-timezone"
 import fs from "fs"
 import path from "path"
 
+const catalogoPath = path.join('./lib', 'catalogo.jpg')
+
 let handler = async (m, { conn, usedPrefix }) => {
   try {
     let menu = {}
@@ -21,7 +23,6 @@ let handler = async (m, { conn, usedPrefix }) => {
     let uptimeStr = `${hours}h ${minutes}m ${seconds}s`
 
     let botNameToShow = global.botname || ""
-    let bannerUrl = global.michipg || ""
     let videoUrl = null
 
     const senderBotNumber = conn.user.jid.split('@')[0]
@@ -30,15 +31,16 @@ let handler = async (m, { conn, usedPrefix }) => {
       try {
         const subBotConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
         if (subBotConfig.name) botNameToShow = subBotConfig.name
-        if (subBotConfig.banner) bannerUrl = subBotConfig.banner
         if (subBotConfig.video) videoUrl = subBotConfig.video
       } catch (e) { console.error(e) }
     }
 
-    let txt = `> .・。.・゜〄・.・〄・゜・。.\n`
-    txt += `✐ *Hola! Soy ${botNameToShow}* ${(conn.user.jid == global.conn.user.jid ? 'Principal 🅥' : 'Sub Bot 🅑')}\n`
-    txt += `> ⊹ *Hora* » ${moment.tz("America/Tegucigalpa").format("HH:mm:ss")}\n`
-    txt += `> ⊹ *Fecha* » ${moment.tz("America/Tegucigalpa").format("DD/MM/YYYY")}\n\n`
+    let mention = `@${m.sender.split('@')[0]}`
+
+    let txt = `> .・。.・゜〄・.・〄・゜・。.\n` +
+      `> Hola *${mention}* soy *${botNameToShow}*, bienvenidx a mi menú.\n` +
+      `> ⊹ *Hora* » ${moment.tz("America/Tegucigalpa").format("HH:mm:ss")}\n` +
+      `> ⊹ *Fecha* » ${moment.tz("America/Tegucigalpa").format("DD/MM/YYYY")}\n\n`
 
     for (let tag in menu) {
       txt += `➭ *✿》${tag.toUpperCase()}《✿*\n`
@@ -58,26 +60,25 @@ let handler = async (m, { conn, usedPrefix }) => {
         {
           video: { url: videoUrl },
           caption: txt,
-          gifPlayback: false
+          gifPlayback: false,
+          mentions: [m.sender]
         },
         { quoted: m }
       )
-    } else if (bannerUrl) {
+    } else if (fs.existsSync(catalogoPath)) {
       await conn.sendMessage(
         m.chat,
         {
-          image: { url: bannerUrl },
-          caption: txt
+          image: fs.readFileSync(catalogoPath),
+          caption: txt,
+          mentions: [m.sender]
         },
         { quoted: m }
       )
     } else {
       await conn.sendMessage(
         m.chat,
-        {
-          image: { url: global.michipg },
-          caption: txt
-        },
+        { text: txt, mentions: [m.sender] },
         { quoted: m }
       )
     }

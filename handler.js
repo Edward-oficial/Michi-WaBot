@@ -145,9 +145,19 @@ export async function handler(chatUpdate) {
     m.exp += Math.ceil(Math.random() * 10);
 
     const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(() => ({})) : {};
-    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.jid, jid: p.jid, lid: p.lid, admin: p.admin })) || [] : [];
-    const userGroup = participants.find(u => conn.decodeJid(u.jid) === m.sender) || {};
-    const botGroup = participants.find(u => conn.decodeJid(u.jid) === this.user.jid) || {};
+    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.id, jid: p.id, lid: p.lid, admin: p.admin })) || [] : [];
+    const numOnly = jid => (jid || '').replace(/@.+/, '').split(':')[0];
+    const findParticipant = targetJid => {
+        const targetNum = numOnly(targetJid);
+        return participants.find(u => {
+            if (conn.decodeJid(u.jid) === targetJid) return true;
+            if (numOnly(u.jid) === targetNum) return true;
+            if (numOnly(u.lid) === targetNum) return true;
+            return false;
+        }) || {};
+    };
+    const userGroup = findParticipant(m.sender);
+    const botGroup = findParticipant(this.user.jid);
     const isRAdmin = userGroup?.admin === "superadmin";
     const isAdmin = isRAdmin || userGroup?.admin === "admin";
     const isBotAdmin = botGroup?.admin;
