@@ -1,63 +1,61 @@
 import fetch from 'node-fetch'
-import yts from 'yt-search'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) return m.reply(`» Ingresa un texto o link de YouTube\n> *Ejemplo:* ${usedPrefix + command} ozuna`)
 
   try {
-    let results, url
+    const api = global.APIs.edward
 
-    
-    let search = await yts(text)
-    if (!search?.all || search.all.length === 0) return m.reply('No se encontraron resultados.')
+    if (!api?.url || !api?.key) {
+      return m.reply('> La API de Edward no está configurada.')
+    }
 
-    results = search.all[0]
-    url = results.url
+    const searchUrl = `${api.url}/api/search/youtube?apiKey=${encodeURIComponent(api.key)}&query=${encodeURIComponent(text)}`
+    const searchRes = await fetch(searchUrl)
+    const search = await searchRes.json()
+
+    if (!search?.status || !search?.data?.length) {
+      return m.reply('> No se encontraron resultados.')
+    }
+
+    const results = search.data[0]
 
     if (command === 'play' || command === 'ytmp3') {
-      let api2 = await (await fetch(`https://api-adonix.ultraplus.click/download/ytmp3?apikey=Adofreekey&url=${url}`)).json()
-      if (!api2?.data?.url) return m.reply('> No se pudo descargar el audio.')
+      const downloadUrl = `${api.url}/api/download/ytaudio?apiKey=${encodeURIComponent(api.key)}&url=${encodeURIComponent(results.url)}`
+      const downloadRes = await fetch(downloadUrl)
+      const api2 = await downloadRes.json()
 
-      let txt = `「✦」Descargando *${results.title}*
+      if (!api2?.status || !api2?.result?.download_url) {
+        return m.reply('> No se pudo descargar el audio.')
+      }
 
-> ✐ Canal » *${results.author?.name || '-'}*
-> ⴵ Duración » *${results.timestamp || '-'}*
-> ✰ Calidad » *${api2.data.quality || '128k'}*
+      const txt = `「✦」Descargando *${results.title}*
+
+> ✐ Canal » *${results.author || '-'}*
+> ⴵ Duración » *${results.duration || '-'}*
+> ✰ Calidad » *Audio*
 > 🜸 Link » ${results.url}`
 
-      await conn.sendMessage(m.chat, { image: { url: results.image }, caption: txt }, { quoted: m })
+      await conn.sendMessage(m.chat, {
+        image: { url: results.thumbnail },
+        caption: txt
+      }, { quoted: m })
 
       await conn.sendMessage(m.chat, {
-        audio: { url: api2.data.url },
+        audio: { url: api2.result.download_url },
         mimetype: 'audio/mpeg',
         fileName: `${results.title || 'audio'}.mp3`,
         ptt: false
       }, { quoted: m })
 
     } else if (command === 'play2' || command === 'ytmp4') {
-      let api2 = await (await fetch(`https://api-adonix.ultraplus.click/download/ytmp4?apikey=Adofreekey&url=${url}`)).json()
-      if (!api2?.data?.url) return m.reply('> No se pudo descargar el video.')
-
-      let txt = `「✦」Descargando *${results.title}*
-
-> ✐ Canal » *${results.author?.name || '-'}*
-> ⴵ Duración » *${results.timestamp || '-'}*
-> ✰ Calidad » *${api2.data.quality || '360p'}*
-> 🜸 Link » ${results.url}`
-
-      await conn.sendMessage(m.chat, { image: { url: results.image }, caption: txt }, { quoted: m })
-
-      await conn.sendMessage(m.chat, {
-        video: { url: api2.data.url },
-        mimetype: 'video/mp4',
-        fileName: `${results.title || 'video'}.mp4`,
-        caption: '> ❑ Aquí tienes'
-      }, { quoted: m })
+      return m.reply('> La API configurada no tiene descarga de video.')
     }
 
   } catch (e) {
-    m.reply(`Error: ${e.message}`)
-    m.react('✖️')
+    console.error(e)
+    await m.reply(`> Error: ${e.message}`)
+    await m.react('✖️')
   }
 }
 
