@@ -1,10 +1,7 @@
 import { execSync } from 'child_process'
 
-let handler = async (m, { conn, text }) => {
-  let owners = global.owner.map(([number]) => number).filter(Boolean)
-  let sender = m.sender.replace(/[^0-9]/g, '')
-
-  if (!owners.includes(sender)) return
+let handler = async (m, { conn, text, isOwner }) => {
+  if (!isOwner) return
 
   await m.react('🕒')
 
@@ -82,5 +79,6 @@ let handler = async (m, { conn, text }) => {
 handler.help = ['update']
 handler.tags = ['owner']
 handler.command = ['update', 'fix', 'actualizar']
+handler.rowner = true
 
 export default handler
