@@ -1,4 +1,4 @@
-// --> Código original de GataNina [ Editado por Ado ]
+// --> Código original de Hinata-bot [ Editado por Duan ]
 import { getUrlFromDirectPath } from "baileysxz"
 import _ from "lodash"
 import axios from 'axios' 
