@@ -47,19 +47,16 @@ let socklimit = global.conns.filter(sock => sock?.user).length
 if (socklimit >= 50) {
 return m.reply(`ꕥ No se han encontrado espacios para *Sockets* disponibles.`)
 }
-let mentionedJid = await m.mentionedJid
 let typedNumber = args.find(a => /^\+?\d{8,15}$/.test(a.replace(/[^0-9]/g, '')))
-let who = mentionedJid && mentionedJid[0]
-? mentionedJid[0]
-: typedNumber
-? `${typedNumber.replace(/[^0-9]/g, '')}@s.whatsapp.net`
-: m.sender
+if (!typedNumber) return m.reply(`ꕥ Debes escribir el número al que se enviará el código.\n> Ejemplo: *${usedPrefix}code 50412345678*`)
+let who = `${typedNumber.replace(/[^0-9]/g, '')}@s.whatsapp.net`
 let id = `${who.split`@`[0]}`
 let pathMichiJadiBot = path.join(global.jadi, id)
 if (!fs.existsSync(pathMichiJadiBot)){
 fs.mkdirSync(pathMichiJadiBot, { recursive: true })
 }
 MichiJBOptions.pathMichiJadiBot = pathMichiJadiBot
+MichiJBOptions.targetJid = who
 MichiJBOptions.m = m
 MichiJBOptions.conn = conn
 MichiJBOptions.args = args
@@ -75,7 +72,7 @@ handler.command = ['qr', 'code']
 export default handler 
 
 export async function MichiJadiBot(options) {
-let { pathMichiJadiBot, m, conn, args, usedPrefix, command } = options
+let { pathMichiJadiBot, m, conn, args, usedPrefix, command, targetJid } = options
 if (command === 'code') {
 command = 'qr'
 args.unshift('code')
