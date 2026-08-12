@@ -34,13 +34,13 @@ let handler = async (m, { conn, text }) => {
     await conn.sendMessage(m.chat, {
       audio: { url: data.result.download_url },
       mimetype: 'audio/mpeg',
-      fileName: `${data.result.title || 'audio'}.mp3',
+      fileName: `${data.result.title || 'audio'}.mp3`,
       ptt: false
     }, { quoted: m })
 
   } catch (e) {
     console.error(e)
-    m.reply(`Error: ${e.message}`)
+    await m.reply(`Error: ${e.message}`)
   }
 }
 
