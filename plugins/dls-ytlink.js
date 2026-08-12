@@ -10,6 +10,8 @@ let handler = async (m, { conn, text }) => {
   try {
     const api = global.APIs.edward
 
+    if (!api) return m.reply('> La API de Edward no está configurada.')
+
     const res = await fetch(
       `${api.url}/api/download/ytaudio?apiKey=${api.key}&url=${encodeURIComponent(text)}`
     )
@@ -20,27 +22,42 @@ let handler = async (m, { conn, text }) => {
       return m.reply('> No se pudo obtener el audio.')
     }
 
-    let info = `「✦」Descargando *${data.result.title || 'Audio'}*
+    const title = data.result.title || 'Audio'
+    const duration = data.result.duration || '-'
+    const thumbnail = data.result.thumbnail
+    const download = data.result.download_url
 
-> ⴵ Duración » *${data.result.duration || '-'}*`
+    const caption = `「✦」Descargando *${title}*
 
-    if (data.result.thumbnail) {
-      await conn.sendMessage(m.chat, {
-        image: { url: data.result.thumbnail },
-        caption: info
-      }, { quoted: m })
+> ⴵ Duración » *${duration}*`
+
+    if (thumbnail) {
+      await conn.sendMessage(
+        m.chat,
+        {
+          image: { url: thumbnail },
+          caption
+        },
+        { quoted: m }
+      )
+    } else {
+      await m.reply(caption)
     }
 
-    await conn.sendMessage(m.chat, {
-      audio: { url: data.result.download_url },
-      mimetype: 'audio/mpeg',
-      fileName: `${data.result.title || 'audio'}.mp3`,
-      ptt: false
-    }, { quoted: m })
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: download },
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.mp3`,
+        ptt: false
+      },
+      { quoted: m }
+    )
 
   } catch (e) {
     console.error(e)
-    await m.reply(`Error: ${e.message}`)
+    await m.reply(`> Error: ${e.message}`)
   }
 }
 
