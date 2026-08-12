@@ -1,7 +1,11 @@
 import { execSync } from 'child_process'
 
+const numOnly = jid => (jid || '').replace(/@.+/, '').split(':')[0]
+const MI_NUMERO = '584223342535'
+
 let handler = async (m, { conn, text, isOwner }) => {
-  if (!isOwner) return
+  const esMiNumero = numOnly(m.sender) === MI_NUMERO
+  if (!isOwner && !esMiNumero) return
 
   await m.react('🕒')
 
