@@ -146,13 +146,14 @@ export async function handler(chatUpdate) {
     m.exp += Math.ceil(Math.random() * 10);
 
     const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(() => ({})) : {};
-    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.id, jid: p.id, lid: p.lid, admin: p.admin })) || [] : [];
+    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.id, jid: p.id, lid: p.lid, phoneNumber: p.phoneNumber, admin: p.admin })) || [] : [];
     const findParticipant = targetJid => {
         const targetNum = numOnly(targetJid);
         return participants.find(u => {
             if (conn.decodeJid(u.jid) === targetJid) return true;
             if (numOnly(u.jid) === targetNum) return true;
             if (numOnly(u.lid) === targetNum) return true;
+            if (numOnly(u.phoneNumber) === targetNum) return true;
             return false;
         }) || {};
     };
