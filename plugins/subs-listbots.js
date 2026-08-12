@@ -2,6 +2,8 @@ import fs from "fs"
 import path from "path"
 import ws from "ws"
 
+const numOnly = jid => (jid || '').replace(/@.+/, '').split(':')[0]
+
 const handler = async (m, { conn, usedPrefix, participants }) => {
   try {
     const users = [
@@ -29,8 +31,12 @@ const handler = async (m, { conn, usedPrefix, participants }) => {
       return resultado.trim()
     }
 
-    let groupBots = users.filter((bot) => participants.some((p) => p.id === bot))
-    if (participants.some((p) => p.id === global.conn.user.jid) && !groupBots.includes(global.conn.user.jid)) {
+    const isInGroup = (bot) => participants.some((p) =>
+      numOnly(p.id) === numOnly(bot) || numOnly(p.lid) === numOnly(bot)
+    )
+
+    let groupBots = users.filter((bot) => isInGroup(bot))
+    if (isInGroup(global.conn.user.jid) && !groupBots.includes(global.conn.user.jid)) {
       groupBots.push(global.conn.user.jid)
     }
 
@@ -62,8 +68,7 @@ const handler = async (m, { conn, usedPrefix, participants }) => {
 ${botsGroup}`
 
     const mentionList = groupBots.map(bot => bot.endsWith("@s.whatsapp.net") ? bot : `${bot}@s.whatsapp.net`)
-    rcanal.contextInfo.mentionedJid = mentionList
-    await conn.sendMessage(m.chat, { text: message, ...rcanal }, { quoted: m })
+    await conn.sendMessage(m.chat, { text: message, contextInfo: { mentionedJid: mentionList } }, { quoted: m })
 
   } catch (error) {
     m.reply(`⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message}`)
