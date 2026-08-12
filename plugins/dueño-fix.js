@@ -1,71 +1,82 @@
 import { execSync } from 'child_process'
 
-var handler = async (m, { conn, text }) => {
-const owners = global.owner.map(([number]) => number + '@s.whatsapp.net')
-if (!owners.includes(m.sender)) return
+let handler = async (m, { conn, text }) => {
+  let owners = global.owner.map(([number]) => number).filter(Boolean)
+  let sender = m.sender.replace(/[^0-9]/g, '')
 
-await m.react('🕒')
+  if (!owners.includes(sender)) return
 
-try {
-const stdout = execSync('git pull' + (m.fromMe && text ? ' ' + text : ''))
-let messager = stdout.toString()
+  await m.react('🕒')
 
-if (messager.includes('❀ Ya está cargada la actualización.')) {
-messager = '❀ Los datos ya están actualizados a la última versión.'
-}
+  try {
+    let stdout = execSync('git pull' + (m.fromMe && text ? ' ' + text : ''))
+    let messager = stdout.toString()
 
-if (messager.includes('ꕥ Actualizando.')) {
-messager = '❀ Procesando, espere un momento mientras me actualizo.\n\n' + stdout.toString()
-}
+    if (messager.includes('Already up to date.')) {
+      messager = '❀ Los datos ya están actualizados a la última versión.'
+    }
 
-await m.react('✔️')
-await conn.reply(m.chat, messager, m)
+    if (messager.includes('Updating')) {
+      messager = '❀ Procesando, espere un momento mientras me actualizo.\n\n' + stdout.toString()
+    }
 
-} catch {
-try {
-const status = execSync('git status --porcelain')
+    await m.react('✔️')
+    await conn.reply(m.chat, messager, m)
 
-if (status.length > 0) {
-const conflictedFiles = status.toString()
-.split('\n')
-.filter(line => line.trim() !== '')
-.map(line => {
-if (
-line.includes('.npm/') ||
-line.includes('.cache/') ||
-line.includes('tmp/') ||
-line.includes('database.json') ||
-line.includes('sessions/Principal/') ||
-line.includes('npm-debug.log')
-) return null
+  } catch (error) {
+    try {
+      let status = execSync('git status --porcelain').toString()
 
-return '*→ ' + line.slice(3) + '*'
-})
-.filter(Boolean)
+      if (status.trim()) {
+        let conflictedFiles = status
+          .split('\n')
+          .filter(line => line.trim())
+          .map(line => {
+            if (
+              line.includes('.npm/') ||
+              line.includes('.cache/') ||
+              line.includes('tmp/') ||
+              line.includes('database.json') ||
+              line.includes('sessions/Principal/') ||
+              line.includes('npm-debug.log')
+            ) return null
 
-if (conflictedFiles.length > 0) {
-const errorMessage = `\`⚠︎ No se pudo realizar la actualización:\`
+            return '*→ ' + line.slice(3) + '*'
+          })
+          .filter(Boolean)
 
-> *Se han encontrado cambios locales en los archivos del bot que entran en conflicto con las nuevas actualizaciones del repositorio.*
+        if (conflictedFiles.length) {
+          await conn.reply(
+            m.chat,
+            `\`⚠︎ No se pudo realizar la actualización:\`\n\n> *Se han encontrado cambios locales en los archivos del bot que entran en conflicto con las nuevas actualizaciones del repositorio.*\n\n${conflictedFiles.join('\n')}`,
+            m
+          )
 
-${conflictedFiles.join('\n')}.`
+          await m.react('✖️')
+          return
+        }
+      }
 
-await conn.reply(m.chat, errorMessage, m)
-await m.react('✖️')
-}
-}
+      await conn.reply(
+        m.chat,
+        `⚠︎ Error al actualizar:\n${error.message}`,
+        m
+      )
 
-} catch (error) {
-console.error(error)
+      await m.react('✖️')
 
-let errorMessage = '⚠︎ Ocurrió un error inesperado.'
+    } catch (e) {
+      console.error(e)
 
-if (error.message) {
-errorMessage += '\n⚠︎ Mensaje de error: ' + error.message
-}
+      await conn.reply(
+        m.chat,
+        `⚠︎ Ocurrió un error inesperado.\n${e.message}`,
+        m
+      )
 
-await conn.reply(m.chat, errorMessage, m)
-}
+      await m.react('✖️')
+    }
+  }
 }
 
 handler.help = ['update']
