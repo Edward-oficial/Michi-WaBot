@@ -13,7 +13,7 @@ const verifi = async () => {
   try {
     const _0x3ca19d = await _0x2fc0c6.readFile("./package.json", "utf-8");
     const _0x499cd1 = JSON.parse(_0x3ca19d);
-    return _0x499cd1.repository?.["url"] === "git+https://github.com/meado-learner/Michi-WaMD.git";
+    return _0x499cd1.repository?.["url"] === "git+https://github.com/Edward-oficial/Michi-WaBot.git";
   } catch {
     return false;
   }
