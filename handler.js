@@ -116,10 +116,11 @@ export async function handler(chatUpdate) {
     }
 
     const conn = m.conn || global.conn;
-    const isROwner = global.owner.some(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender);
+    const numOnly = jid => (jid || "").replace(/@.+/, "").split(":")[0];
+    const isROwner = global.owner.some(([number]) => numOnly(number) === numOnly(m.sender));
     const isOwner = isROwner || m.fromMe;
-    const isMods = isROwner || global.mods.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender);
-    const isPrems = isROwner || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender) || user.premium;
+    const isMods = isROwner || global.mods.some(v => numOnly(v) === numOnly(m.sender));
+    const isPrems = isROwner || global.prems.some(v => numOnly(v) === numOnly(m.sender)) || user.premium;
 
     if (opts["nyimak"]) return;
     if (!m.fromMe && !isMods && settings.self) return;
@@ -146,7 +147,6 @@ export async function handler(chatUpdate) {
 
     const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(() => ({})) : {};
     const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.id, jid: p.id, lid: p.lid, admin: p.admin })) || [] : [];
-    const numOnly = jid => (jid || '').replace(/@.+/, '').split(':')[0];
     const findParticipant = targetJid => {
         const targetNum = numOnly(targetJid);
         return participants.find(u => {
