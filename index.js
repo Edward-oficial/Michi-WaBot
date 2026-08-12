@@ -11,7 +11,6 @@ import yargs from 'yargs'
 import { spawn, execSync } from 'child_process'
 import lodash from 'lodash'
 import { MichiJadiBot } from './plugins/subs-conexion.js'
-let MichiJadiBot = () => {}
 import chalk from 'chalk'
 import syntaxerror from 'syntax-error'
 import { tmpdir } from 'os'
