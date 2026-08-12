@@ -50,7 +50,7 @@ return m.reply(`ꕥ No se han encontrado espacios para *Sockets* disponibles.`)
 let mentionedJid = await m.mentionedJid
 let who = mentionedJid && mentionedJid[0] ? mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
 let id = `${who.split`@`[0]}`
-let pathMichiJadiBot = path.join(`./${jadi}/`, id)
+let pathMichiJadiBot = path.join(global.jadi, id)
 if (!fs.existsSync(pathMichiJadiBot)){
 fs.mkdirSync(pathMichiJadiBot, { recursive: true })
 }
@@ -104,7 +104,7 @@ printQRInTerminal: false,
 auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level: 'silent'})) },
 msgRetry,
 msgRetryCache, 
-browser: ['Windows', 'Firefox'],
+browser: ['Ubuntu', 'Chrome', '120.0.0.0'],
 version: version,
 generateHighQualityLinkPreview: true
 }
