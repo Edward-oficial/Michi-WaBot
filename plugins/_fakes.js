@@ -17,8 +17,8 @@ handler.all = async function (m) {
   if (!m?.sender) return
 
   global.canalIdM = [
-    "120363403739366547@newsletter",
-    "120363403739366547@newsletter"
+    "120363418111976564@newsletter",
+    "120363418111976564@newsletter"
   ]
 
   global.canalNombreM = [
