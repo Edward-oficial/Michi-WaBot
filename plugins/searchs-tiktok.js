@@ -6,11 +6,22 @@ const handler = async (m, { conn, text, usedPrefix }) => {
   try {
     await m.react('🕒');
 
-    const searchUrl = `https://api.lempi.lat/s/tiktok?q=${encodeURIComponent(text)}&count=10&cursor=0&apikey=shadow15`;
+    const searchUrl = 'https://tikwm.com/api/feed/search';
+
+    const params = new URLSearchParams();
+    params.append('keywords', text);
+    params.append('count', '10');
+    params.append('cursor', '0');
+    params.append('HD', '1');
 
     const res = await fetch(searchUrl, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Cookie': 'current_language=en',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+      },
+      body: params.toString()
     });
 
     const json = await res.json();
