@@ -267,6 +267,81 @@ console.error('Error en processLidsInMessage:', e)
 return message
 }}
 
+async function generarBienvenida({ conn, userId, groupMetadata, chat }) {
+const username = `@${userId.split('@')[0]}`
+const pp = await conn.profilePictureUrl(userId, 'image').catch(() =>
+'https://raw.githubusercontent.com/The-King-Destroy/Adiciones/main/Contenido/1745522645448.jpeg'
+)
+const fecha = new Date().toLocaleDateString("es-ES", {
+timeZone: "America/Mexico_City",
+day: 'numeric',
+month: 'long',
+year: 'numeric'
+})
+const groupSize = groupMetadata.participants.length + 1
+const desc = groupMetadata.desc?.toString() || 'Sin descripción'
+const mensaje = (chat.sWelcome || 'Edita con el comando "setwelcome"')
+.replace(/{usuario}/g, `${username}`)
+.replace(/{grupo}/g, `*${groupMetadata.subject}*`)
+.replace(/{desc}/g, `${desc}`)
+
+const caption = `ꕤ \`Bienvenida\` ꕤ\n\n✐ *Hola* ${username}\n⊹ Te damos la bienvenida a *${groupMetadata.subject}*\n⊹ ${mensaje}\n⊹ ${desc}\n✦ Ahora somos *${groupSize}* miembros\nꕥ Fecha » ${fecha}\n\n> \`Esperamos que disfrutes tu estadía 🤍\``
+return { pp, caption, mentions: [userId] }
+}
+
+async function generarDespedida({ conn, userId, groupMetadata, chat }) {
+const username = `@${userId.split('@')[0]}`
+const pp = await conn.profilePictureUrl(userId, 'image').catch(() =>
+'https://raw.githubusercontent.com/The-King-Destroy/Adiciones/main/Contenido/1745522645448.jpeg'
+)
+const fecha = new Date().toLocaleDateString("es-ES", {
+timeZone: "America/Mexico_City",
+day: 'numeric',
+month: 'long',
+year: 'numeric'
+})
+const groupSize = groupMetadata.participants.length - 1
+const desc = groupMetadata.desc?.toString() || 'Sin descripción'
+const mensaje = (chat.sBye || 'Edita con el comando "setbye"')
+.replace(/{usuario}/g, `${username}`)
+.replace(/{grupo}/g, `${groupMetadata.subject}`)
+.replace(/{desc}/g, `*${desc}*`)
+
+const caption = `ꕤ \`Despedida\` ꕤ\n\n✐ ${username} *ha salido del grupo*\n⊹ Grupo » *${groupMetadata.subject}*\n⊹ ${mensaje}\n⊹ ${desc}\n✦ Ahora somos *${groupSize}* miembros\nꕥ Fecha » ${fecha}\n\n> \`Te esperamos pronto 🤍\``
+return { pp, caption, mentions: [userId] }
+}
+
+async function groupParticipantsHandler({ id, participants, action }) {
+try {
+if (!id?.endsWith('@g.us')) return
+if (action !== 'add' && action !== 'remove') return
+if (!global.db?.data?.chats?.[id]) return
+
+const chat = global.db.data.chats[id]
+if (!chat.welcome) return
+
+const primaryBot = chat.primaryBot
+if (primaryBot && conn.user.jid !== primaryBot) return
+
+const groupMetadata = await conn.groupMetadata(id).catch(() => null)
+if (!groupMetadata) return
+
+const canal = global.rcanal || { contextInfo: {} }
+
+for (const userId of participants) {
+if (action === 'add') {
+const { pp, caption, mentions } = await generarBienvenida({ conn, userId, groupMetadata, chat })
+canal.contextInfo.mentionedJid = mentions
+await conn.sendMessage(id, { image: { url: pp }, caption, ...canal }, { quoted: null })
+} else if (action === 'remove') {
+const { pp, caption, mentions } = await generarDespedida({ conn, userId, groupMetadata, chat })
+canal.contextInfo.mentionedJid = mentions
+await conn.sendMessage(id, { image: { url: pp }, caption, ...canal }, { quoted: null })
+}}
+} catch (e) {
+console.error('Error en groupParticipantsHandler (bienvenida/despedida):', e)
+}}
+
 async function connectionUpdate(update) {
 const {connection, lastDisconnect, isNewLogin} = update
 global.stopped = connection
@@ -334,10 +409,12 @@ if (!isInit) {
 conn.ev.off('messages.upsert', conn.handler)
 conn.ev.off('connection.update', conn.connectionUpdate)
 conn.ev.off('creds.update', conn.credsUpdate)
+conn.ev.off('group-participants.update', conn.groupParticipantsHandler)
 }
 conn.handler = handler.handler.bind(global.conn)
 conn.connectionUpdate = connectionUpdate.bind(global.conn)
 conn.credsUpdate = saveCreds.bind(global.conn, true)
+conn.groupParticipantsHandler = groupParticipantsHandler.bind(global.conn)
 const currentDateTime = new Date()
 const messageDateTime = new Date(conn.ev)
 if (currentDateTime >= messageDateTime) {
@@ -348,6 +425,7 @@ const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('
 conn.ev.on('messages.upsert', conn.handler)
 conn.ev.on('connection.update', conn.connectionUpdate)
 conn.ev.on('creds.update', conn.credsUpdate)
+conn.ev.on('group-participants.update', conn.groupParticipantsHandler)
 isInit = false
 return true
 }
