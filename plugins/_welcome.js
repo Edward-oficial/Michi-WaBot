@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { WAMessageStubType } from 'baileysxz'
 
 async function generarBienvenida({ conn, userId, groupMetadata, chat }) {
@@ -54,12 +53,12 @@ handler.before = async function (m, { conn, participants, groupMetadata }) {
 
   const chat = global.db.data.chats[m.chat]
   const userId = m.messageStubParameters[0]
+  const canal = global.rcanal || { contextInfo: {} }
 
   if (chat.welcome && m.messageStubType == WAMessageStubType.GROUP_PARTICIPANT_ADD) {
     const { pp, caption, mentions } = await generarBienvenida({ conn, userId, groupMetadata, chat })
-    rcanal.contextInfo.mentionedJid = mentions
-    await conn.sendMessage(m.chat, { image: { url: pp }, caption, ...rcanal }, { quoted: null })
-    try { fs.unlinkSync(img) } catch {}
+    canal.contextInfo.mentionedJid = mentions
+    await conn.sendMessage(m.chat, { image: { url: pp }, caption, ...canal }, { quoted: null })
   }
 
   if (chat.welcome && (
@@ -67,9 +66,8 @@ handler.before = async function (m, { conn, participants, groupMetadata }) {
     m.messageStubType == WAMessageStubType.GROUP_PARTICIPANT_LEAVE
   )) {
     const { pp, caption, mentions } = await generarDespedida({ conn, userId, groupMetadata, chat })
-    rcanal.contextInfo.mentionedJid = mentions
-    await conn.sendMessage(m.chat, { image: { url: pp }, caption, ...rcanal }, { quoted: null })
-    try { fs.unlinkSync(img) } catch {}
+    canal.contextInfo.mentionedJid = mentions
+    await conn.sendMessage(m.chat, { image: { url: pp }, caption, ...canal }, { quoted: null })
   }
 }
 
