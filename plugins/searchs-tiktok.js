@@ -14,10 +14,26 @@ const handler = async (m, { conn, text, usedPrefix }) => {
     });
 
     const json = await res.json();
-    const results = json?.data?.videos || json?.data?.result || json?.data || json?.result || [];
 
-    const list = Array.isArray(results) ? results : [];
-    const valid = list.filter(v => v.play || v.url || v.downloadUrl || v.nowatermark || v.video);
+    const rawItems = Array.isArray(json) 
+      ? json 
+      : (json?.data?.videos || json?.data?.result || json?.data || json?.result || json?.videos || []);
+
+    const list = Array.isArray(rawItems) ? rawItems : [];
+
+    const valid = list.map(v => {
+      const videoUrl = v.play || v.no_watermark || v.nowatermark || v.wmplay || v.downloadUrl || v.url || v.video || (typeof v === 'string' ? v : null);
+      const title = v.title || v.desc || v.description || 'Video TikTok';
+      const authorName = v.author?.nickname || v.author?.unique_id || v.author || v.nickname || 'Desconocido';
+      const duration = v.duration || v.duration_seconds || 'No disponible';
+
+      return {
+        url: videoUrl,
+        title,
+        author: authorName,
+        duration
+      };
+    }).filter(v => typeof v.url === 'string' && v.url.startsWith('http'));
 
     if (valid.length < 2) {
       return conn.reply(m.chat, 'ꕥ Se requieren al menos 2 resultados válidos con contenido.', m);
@@ -25,10 +41,10 @@ const handler = async (m, { conn, text, usedPrefix }) => {
 
     const medias = valid.slice(0, 10).map(v => ({
       type: 'video',
-      data: { url: v.play || v.url || v.downloadUrl || v.nowatermark || v.video },
-      caption: `✐ Título » ${v.title || 'Video TikTok'}
-ⴵ Autor » ${v.author?.nickname || v.author || 'Desconocido'}
-✰ Duración » ${v.duration || 'No disponible'} segundos
+      data: { url: v.url },
+      caption: `✐ Título » ${v.title}
+ⴵ Autor » ${v.author}
+✰ Duración » ${v.duration} segundos
 ❒ Formato » Video`
     }));
 
