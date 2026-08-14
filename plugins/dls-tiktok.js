@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 var handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return conn.reply(m.chat, `❐ Por favor ingresa el enlace del TikTok.`, m, { ...rcanal })
+  if (!text) return conn.reply(m.chat, `❐ Por favor ingresa el enlace del TikTok.`, m)
   try {
     await m.react('🕒')
 
@@ -20,16 +20,16 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
                     `> ✐ Vistas » *${play_count || 0}*\n` +
                     `> ✐ Link » ${text}`
 
-    await conn.sendMessage(m.chat, { video: { url: play }, caption, ...rcanal }, { quoted: m })
+    await conn.sendMessage(m.chat, { video: { url: play }, caption }, { quoted: m })
 
     if (music) {
-      await conn.sendMessage(m.chat, { audio: { url: music }, fileName: `${title || 'tiktok'}.mp3`, mimetype: 'audio/mpeg', ...rcanal }, { quoted: m })
+      await conn.sendMessage(m.chat, { audio: { url: music }, fileName: `${title || 'tiktok'}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
     }
 
     await m.react('✔️')
   } catch (error) {
     await m.react('✖️')
-    return conn.reply(m.chat, `⚠︎ Ocurrió un error.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message || error}`, m, { ...rcanal })
+    return conn.reply(m.chat, `⚠︎ Ocurrió un error.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message || error}`, m)
   }
 }
 
@@ -44,4 +44,4 @@ async function tiktokdl(url) {
   const tikwm = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`
   const response = await (await fetch(tikwm, { signal: AbortSignal.timeout(20000) })).json()
   return response
-  }
+           }
