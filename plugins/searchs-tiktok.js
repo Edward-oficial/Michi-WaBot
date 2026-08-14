@@ -6,37 +6,20 @@ const handler = async (m, { conn, text, usedPrefix }) => {
   try {
     await m.react('🕒');
 
-    const searchUrl = 'https://tikwm.com/api/feed/search';
+    const apikey = 'dvyer222083176577';
+    const limit = 10;
+    const searchUrl = `https://dv-yer-api.online/tiktok/search?q=${encodeURIComponent(text)}&limit=${limit}&apikey=${apikey}`;
 
-    const params = new URLSearchParams();
-    params.append('keywords', text);
-    params.append('count', '10');
-    params.append('cursor', '0');
-    params.append('HD', '1');
-
-    const res = await fetch(searchUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Cookie': 'current_language=en',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
-      },
-      body: params.toString()
-    });
-
+    const res = await fetch(searchUrl);
     const json = await res.json();
 
-    const rawItems = Array.isArray(json) 
-      ? json 
-      : (json?.data?.videos || json?.data?.result || json?.data || json?.result || json?.videos || []);
+    const rawItems = json?.results || [];
 
-    const list = Array.isArray(rawItems) ? rawItems : [];
-
-    const valid = list.map(v => {
-      const videoUrl = v.play || v.no_watermark || v.nowatermark || v.wmplay || v.downloadUrl || v.url || v.video || (typeof v === 'string' ? v : null);
-      const title = v.title || v.desc || v.description || 'Video TikTok';
-      const authorName = v.author?.nickname || v.author?.unique_id || v.author || v.nickname || 'Desconocido';
-      const duration = v.duration || v.duration_seconds || 'No disponible';
+    const valid = rawItems.map(v => {
+      const videoUrl = v.stream_url || v.download_url || v.links?.stream || v.links?.download;
+      const title = v.title || v.description || 'Video TikTok';
+      const authorName = v.author || v.username || 'Desconocido';
+      const duration = v.duration_seconds || 'No disponible';
 
       return {
         url: videoUrl,
