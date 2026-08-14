@@ -33,7 +33,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: meta.id,
-              newsletterName: meta.name || 'TikTok Downloader',
+              newsletterName: meta.name || 'TikTok Michi-WaBot',
               serverMessageId: 100
             }
           }
