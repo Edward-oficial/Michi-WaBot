@@ -55,7 +55,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
     txt += `> : *Actividad* » ${uptimeStr}`
 
-    // Resolver el link del canal a su JID real
+    
     let channelContext = {}
     try {
       const inviteCode = channelLink.split('/channel/')[1]
