@@ -46,16 +46,18 @@ let handler = async (m, { conn, usedPrefix }) => {
     for (let tag in menu) {
       txt += `➭ *✿》${tag.toUpperCase()}《✿*\n`
       for (let plugin of menu[tag]) {
-        for (let cmd of plugin.help) {
-          txt += `> ⟩ *${usedPrefix}${cmd}*\n`
-        }
+        let [mainCmd, ...aliases] = plugin.help
+        let aliasStr = aliases.length
+          ? ` _(${aliases.slice(0, 2).join(', ')})_`
+          : ''
+        txt += `> ⟩ *${usedPrefix}${mainCmd}*${aliasStr}\n`
       }
       txt += `\n`
     }
 
     txt += `> : *Actividad* » ${uptimeStr}`
 
-    
+    // Resolver el link del canal a su JID real
     let channelContext = {}
     try {
       const inviteCode = channelLink.split('/channel/')[1]
