@@ -7,7 +7,7 @@ import chalk from "chalk";
 import fetch from "node-fetch";
 import ws from "ws";
 
-const { proto } = (await import("baileysxz")).default;
+const { proto } = (await import("@whiskeysockets/baileys")).default;
 const isNumber = x => typeof x === "number" && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(resolve, ms));
 
@@ -116,11 +116,10 @@ export async function handler(chatUpdate) {
     }
 
     const conn = m.conn || global.conn;
-    const numOnly = jid => (jid || "").replace(/@.+/, "").split(":")[0];
-    const isROwner = global.owner.some(([number]) => numOnly(number) === numOnly(m.sender));
+    const isROwner = global.owner.some(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender);
     const isOwner = isROwner || m.fromMe;
-    const isMods = isROwner || global.mods.some(v => numOnly(v) === numOnly(m.sender));
-    const isPrems = isROwner || global.prems.some(v => numOnly(v) === numOnly(m.sender)) || user.premium;
+    const isMods = isROwner || global.mods.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender);
+    const isPrems = isROwner || global.prems.some(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net" === m.sender) || user.premium;
 
     if (opts["nyimak"]) return;
     if (!m.fromMe && !isMods && settings.self) return;
@@ -146,19 +145,9 @@ export async function handler(chatUpdate) {
     m.exp += Math.ceil(Math.random() * 10);
 
     const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(() => ({})) : {};
-    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.id, jid: p.id, lid: p.lid, phoneNumber: p.phoneNumber, admin: p.admin })) || [] : [];
-    const findParticipant = targetJid => {
-        const targetNum = numOnly(targetJid);
-        return participants.find(u => {
-            if (conn.decodeJid(u.jid) === targetJid) return true;
-            if (numOnly(u.jid) === targetNum) return true;
-            if (numOnly(u.lid) === targetNum) return true;
-            if (numOnly(u.phoneNumber) === targetNum) return true;
-            return false;
-        }) || {};
-    };
-    const userGroup = findParticipant(m.sender);
-    const botGroup = findParticipant(this.user.jid);
+    const participants = m.isGroup ? groupMetadata.participants?.map(p => ({ id: p.jid, jid: p.jid, lid: p.lid, admin: p.admin })) || [] : [];
+    const userGroup = participants.find(u => conn.decodeJid(u.jid) === m.sender) || {};
+    const botGroup = participants.find(u => conn.decodeJid(u.jid) === this.user.jid) || {};
     const isRAdmin = userGroup?.admin === "superadmin";
     const isAdmin = isRAdmin || userGroup?.admin === "admin";
     const isBotAdmin = botGroup?.admin;
