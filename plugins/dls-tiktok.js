@@ -1,5 +1,7 @@
 import fetch from 'node-fetch'
 
+const channelLink = "https://whatsapp.com/channel/0029VbAwDX6CcW4sC2JfXw2L"
+
 var handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) return conn.reply(m.chat, `❐ Por favor ingresa el enlace del TikTok.`, m)
   try {
@@ -20,10 +22,31 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
                     `> ✐ Vistas » *${play_count || 0}*\n` +
                     `> ✐ Link » ${text}`
 
-    await conn.sendMessage(m.chat, { video: { url: play }, caption }, { quoted: m })
+    let channelContext = {}
+    try {
+      const inviteCode = channelLink.split('/channel/')[1]
+      const meta = await conn.newsletterMetadata("invite", inviteCode)
+      if (meta?.id) {
+        channelContext = {
+          contextInfo: {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: meta.id,
+              newsletterName: meta.name || 'TikTok Downloader',
+              serverMessageId: 100
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("No se pudo resolver el canal:", e)
+    }
+
+    await conn.sendMessage(m.chat, { video: { url: play }, caption, ...channelContext }, { quoted: m })
 
     if (music) {
-      await conn.sendMessage(m.chat, { audio: { url: music }, fileName: `${title || 'tiktok'}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
+      await conn.sendMessage(m.chat, { audio: { url: music }, fileName: `${title || 'tiktok'}.mp3`, mimetype: 'audio/mpeg', ...channelContext }, { quoted: m })
     }
 
     await m.react('✔️')
@@ -44,4 +67,4 @@ async function tiktokdl(url) {
   const tikwm = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`
   const response = await (await fetch(tikwm, { signal: AbortSignal.timeout(20000) })).json()
   return response
-           }
+                      }
