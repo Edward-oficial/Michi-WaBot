@@ -35,7 +35,7 @@ const handler = async (m, { conn, text, usedPrefix }) => {
 
     const medias = valid.slice(0, 10).map(v => ({
       type: 'video',
-      data: { url: v.url },
+      data: { url: `${v.url}${v.url.includes('?') ? '&' : '?'}apikey=${apikey}` },
       caption: `✐ Título » ${v.title}
 ⴵ Autor » ${v.author}
 ✰ Duración » ${v.duration} segundos
@@ -57,5 +57,6 @@ handler.tags = ['buscadores'];
 handler.command = ['tiktoks', 'tiktoksearch'];
 handler.group = true;
 handler.coin = 23;
+handler.timeout = 120000;
 
 export default handler;
